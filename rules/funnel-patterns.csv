@@ -1,0 +1,8 @@
+stage,pattern,weight
+TOFU,^(what is|what are|why|how do|how does|how to|how can|when to|should i|is it|can you),1
+TOFU,\b(basics|beginner|explained|introduction|guide to|trends?|statistics|examples? of|definition|meaning)\b,1
+TOFU,\b(problem|challenges?|mistakes?|signs|causes?)\b,0.5
+MOFU,\b(vs|versus|alternatives?|compare|comparison|best|top \d+|checklist|template|framework|evaluate|evaluation|criteria|how to choose|buyer'?s guide)\b,1.5
+MOFU,\b(tools?|software|platforms?|solutions?)\b,0.5
+BOFU,\b(pricing|price|demo|free trial|quote|buy|case study|customer stor(y|ies)|implementation|roi|reviews?|contact us)\b,2
+BOFU,\b(migration plan|vendor|rfp|procurement)\b,1.5

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Example Martech Daily (made up)</title>
+<entry><title>Deduplication tools are getting smarter, and buyers are comparing them closely</title><link href="https://martech-daily.example/dedupe-tools-compared"/><updated>2026-10-07T10:00:00Z</updated><summary>A look at matching methods.</summary></entry>
+<entry><title>The hidden cost of messy data in marketing automation</title><link href="https://martech-daily.example/messy-data-cost"/><updated>2026-10-09T10:00:00Z</updated><summary>Wasted sends and broken segments.</summary></entry>
+<entry><title>Data hygiene is a team habit, not a one-time project</title><link href="https://martech-daily.example/data-hygiene-habit"/><updated>2026-10-13T10:00:00Z</updated><summary>Ownership matters.</summary></entry>
+<entry><title>AI data quality checks go mainstream in operations teams</title><link href="https://martech-daily.example/ai-data-quality-checks"/><updated>2026-10-19T10:00:00Z</updated><summary>Early adopters share lessons.</summary></entry>
+<entry><title>How to choose a data quality platform: five questions to ask vendors</title><link href="https://martech-daily.example/choose-data-quality-platform"/><updated>2026-10-21T10:00:00Z</updated><summary>A buyer's checklist.</summary></entry>
+<entry><title>Revenue teams rethink lead assignment after a messy quarter</title><link href="https://martech-daily.example/lead-assignment-rethink"/><updated>2026-10-23T10:00:00Z</updated><summary>Routing and ownership.</summary></entry>
+</feed>

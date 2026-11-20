@@ -1,0 +1,20 @@
+{
+  "brand": "Fernhill Software",
+  "note": "Made-up example. Fernhill is a fictional company that sells software to clean up duplicate and messy customer records in a CRM.",
+  "domain": "fernhill.example",
+  "audiences": ["RevOps manager", "CRM administrator", "Analytics lead"],
+  "voice": "Plain, confident, practical. No fear-based messaging and no hype words.",
+  "avoid_words": ["revolutionary", "game-changing", "unleash", "cutting-edge"],
+  "themes": {
+    "duplicate records": {"fit": 1.0, "triggers": ["duplicate records", "duplicate contacts", "duplicates", "dedupe", "deduplication"]},
+    "crm data cleanup": {"fit": 1.0, "triggers": ["data cleanup", "crm cleanup", "clean crm", "messy data", "data hygiene"]},
+    "trusted reporting": {"fit": 0.8, "triggers": ["data quality", "bad data", "reporting accuracy", "trusted data", "single source of truth"]},
+    "crm migration": {"fit": 0.6, "triggers": ["crm migration", "migrating crm", "data migration"]},
+    "lead routing": {"fit": 0.4, "triggers": ["lead routing", "lead assignment"]},
+    "ai data readiness": {"fit": 0.7, "triggers": ["ai data", "ai readiness", "data for ai"]}
+  },
+  "competitors": [
+    {"name": "tidybase", "note": "made-up competitor"},
+    {"name": "cleanly", "note": "made-up competitor"}
+  ]
+}

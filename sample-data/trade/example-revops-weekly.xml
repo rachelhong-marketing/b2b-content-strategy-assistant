@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>Example RevOps Weekly (made up)</title>
+<item><title>Why duplicate records quietly wreck your pipeline reports</title><link>https://revops-weekly.example/duplicate-records-pipeline</link><pubDate>Tue, 06 Oct 2026 09:00:00 GMT</pubDate><description>&lt;p&gt;Duplicates inflate lead counts and split account history.&lt;/p&gt;</description></item>
+<item><title>RevOps leaders say bad data is the top blocker to trusted reporting</title><link>https://revops-weekly.example/bad-data-top-blocker</link><pubDate>Thu, 08 Oct 2026 09:00:00 GMT</pubDate><description>Survey of 400 operations leaders (made-up numbers omitted).</description></item>
+<item><title>How to run a CRM data cleanup without freezing sales</title><link>https://revops-weekly.example/crm-cleanup-without-freezing</link><pubDate>Mon, 12 Oct 2026 09:00:00 GMT</pubDate><description>A phased approach.</description></item>
+<item><title>Lead routing rules that break when accounts are duplicated</title><link>https://revops-weekly.example/lead-routing-duplicates</link><pubDate>Wed, 14 Oct 2026 09:00:00 GMT</pubDate><description>Routing depends on clean account matches.</description></item>
+<item><title>What AI readiness really means for your customer data</title><link>https://revops-weekly.example/ai-readiness-customer-data</link><pubDate>Fri, 16 Oct 2026 09:00:00 GMT</pubDate><description>Models are only as good as the records behind them.</description></item>
+<item><title>CRM migration checklist: what to clean before you move</title><link>https://revops-weekly.example/crm-migration-checklist</link><pubDate>Tue, 20 Oct 2026 09:00:00 GMT</pubDate><description>Migrating dirty data just moves the problem.</description></item>
+<item><title>Single source of truth: why teams still argue over numbers</title><link>https://revops-weekly.example/single-source-of-truth</link><pubDate>Thu, 22 Oct 2026 09:00:00 GMT</pubDate><description>Three dashboards, three answers.</description></item>
+<item><title>Board season tip: freeze your definitions before you report</title><link>https://revops-weekly.example/freeze-definitions</link><pubDate>Fri, 23 Oct 2026 09:00:00 GMT</pubDate><description>Definitions drift.</description></item>
+</channel></rss>

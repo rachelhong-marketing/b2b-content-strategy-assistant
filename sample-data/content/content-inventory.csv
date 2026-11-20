@@ -1,0 +1,5 @@
+url,title,stage,publish_date
+https://fernhill.example/blog/what-is-data-hygiene,What is data hygiene?,TOFU,2025-11-10
+https://fernhill.example/blog/duplicate-records,Duplicate records in your CRM: how to spot them,TOFU,2025-12-02
+https://fernhill.example/blog/remove-duplicate-contacts,How to remove duplicate contacts,TOFU,2026-01-20
+https://fernhill.example/blog/crm-cleanup,CRM data cleanup: where to start,MOFU,2026-02-18
