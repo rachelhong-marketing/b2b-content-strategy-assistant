@@ -19,7 +19,8 @@ def _kwline(d):
 
 def idea_lines(x):
     stage_note = x["stage"] + (" (default rule)" if str(x["matched"]).startswith("(default") else " (matched a rule)")
-    head = f"- **{x['text']}**, score {x['score']}, theme: {x['theme'] or 'none yet'}, suggested format: {x['format']}"
+    off = "" if x.get("on_campaign", True) else ", outside the campaign theme"
+    head = f"- **{x['text']}**, score {x['score']}, theme: {x['theme'] or 'none yet'}{off}, suggested format: {x['format']}"
     if x["kind"] == "keyword":
         ev = f"  - Keyword data: {_kwline(x['data'])}; stage rule: {stage_note}"
     elif x["kind"] == "question":
@@ -34,6 +35,7 @@ def idea_lines(x):
 def build(brand, as_of, counts, themetable, by_stage, emerging, comp_new, comp_themes, refresh, inventory_stage, ebooks, gaps):
     L = [f"# Content topic brief: {brand['brand']}", "",
          f"Prepared as of {as_of}. Audiences: {', '.join(brand['audiences'])}.",
+         *( [f"Campaign: {brand['campaign'].get('name', '')}. Theme: {brand['campaign'].get('theme', '')}. Ideas outside the campaign themes count for 60 percent of their score and are labeled.", ""] if brand.get("campaign") else [] ),
          "This is a starting point for a brainstorm, not a decision. Every idea below has its evidence next to it. Scores compare ideas within this run only.", "",
          "## Data used", ""]
     for k, v in counts.items():

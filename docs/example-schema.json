@@ -1,0 +1,59 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "How do you spot duplicate records in your customer relationship management (CRM) system?",
+      "author": {
+        "@type": "Person",
+        "name": "Sam Example",
+        "jobTitle": "Head of Revenue Operations"
+      },
+      "datePublished": "2026-10-20",
+      "dateModified": "2026-10-20",
+      "mainEntityOfPage": "https://fernhill.example/blog/how-do-you-spot-duplicate-records-in-your-customer",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Fernhill Software"
+      },
+      "about": "duplicate records"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How many duplicate records is normal?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "There is no standard number. In our made-up sample, about 11 percent of contacts had a near twin. Treat any share above a few percent as worth cleaning, because the reporting error grows with every campaign."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Should I merge duplicates automatically?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Merge exact matches automatically if you keep a backup. Send near matches to a person for review. A wrong merge is hard to undo, so the review step is worth the time."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Who should own duplicate cleanup?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Revenue operations usually owns the rules, and each team owns the records it creates. Give one person the job of approving rule changes so the fixes stay consistent."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How often should we check?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Run the three passes monthly, and after any large import or system change. Most new duplicates appear right after an import, an event list upload or a form change."
+          }
+        }
+      ]
+    }
+  ]
+}

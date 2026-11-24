@@ -1,6 +1,8 @@
 # Content topic brief: Fernhill Software
 
 Prepared as of 2026-10-23. Audiences: RevOps manager, CRM administrator, Analytics lead.
+Campaign: Trusted CRM data. Theme: Your reports are only as good as your records. Ideas outside the campaign themes count for 60 percent of their score and are labeled.
+
 This is a starting point for a brainstorm, not a decision. Every idea below has its evidence next to it. Scores compare ideas within this run only.
 
 ## Data used
@@ -12,6 +14,7 @@ This is a starting point for a brainstorm, not a decision. Every idea below has 
 - Semrush keywords: 11
 - Google Trends terms: 3
 - Your published content (inventory): 4
+- Ideas hidden because you already chose them: 0 (none chosen yet)
 
 ## Themes ranked
 

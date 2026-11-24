@@ -10,6 +10,9 @@ WEIGHTS = dict(mentions=0.20, engagement=0.10, demand=0.20, ease=0.10, trend=0.1
 RECENT_DAYS = 90
 
 
+OFF_CAMPAIGN = 0.6  # ideas outside the campaign themes count for 60 percent when a campaign is set
+
+
 def is_question(title):
     t = (title or "").strip()
     return t.endswith("?") or bool(QUESTION_RX.match(t))
@@ -91,6 +94,7 @@ def ideas_by_stage(themetable, items, keywords, brand, rules, as_of, top=8, hide
     """Topic ideas from three kinds of evidence: keywords people search, questions people ask, headlines in the news.
     Each idea is placed in a funnel stage and scored: half from its theme's score, half from its own signal."""
     themes = brand["themes"]
+    campaign_themes = set((brand.get("campaign") or {}).get("themes", []))
     score_of = {t["theme"]: t["score"] for t in themetable}
     vols = minmax({k: v["volume"] for k, v in keywords.items()})
     kds = minmax({k: v["difficulty"] for k, v in keywords.items()})
@@ -108,8 +112,12 @@ def ideas_by_stage(themetable, items, keywords, brand, rules, as_of, top=8, hide
         found = themes_for(text, themes)
         theme = max(found, key=lambda n: score_of.get(n, 0)) if found else ""
         stage, why = classify(text, rules)
-        ideas.append(dict(kind=kind, text=text, stage=stage, matched=why, theme=theme, hidden=hidden,
-                          score=round(0.5 * score_of.get(theme, 0.0) + 0.5 * 100 * signal, 1), format=FORMATS[stage], **extra))
+        score = 0.5 * score_of.get(theme, 0.0) + 0.5 * 100 * signal
+        on_campaign = not campaign_themes or theme in campaign_themes
+        if not on_campaign:
+            score *= OFF_CAMPAIGN
+        ideas.append(dict(kind=kind, text=text, stage=stage, matched=why, theme=theme, hidden=hidden, on_campaign=on_campaign,
+                          score=round(score, 1), format=FORMATS[stage], **extra))
 
     for k, v in keywords.items():
         if v["volume"] is None:

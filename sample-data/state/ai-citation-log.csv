@@ -1,0 +1,17 @@
+date_tested,question,engine,our_site_cited,competitors_cited,notes
+2026-09-15,What is data hygiene?,ChatGPT,no,tidybase,made-up test
+2026-09-15,How do I find duplicate contacts in my CRM?,ChatGPT,no,tidybase,made-up test
+2026-09-15,Why are my CRM reports wrong?,ChatGPT,mentioned,"cleanly, tidybase",made-up test
+2026-09-15,How do I remove duplicate contacts?,ChatGPT,no,tidybase,made-up test
+2026-09-15,What is data hygiene?,Perplexity,no,tidybase,made-up test
+2026-09-15,How do I find duplicate contacts in my CRM?,Perplexity,yes,cleanly,made-up test
+2026-09-15,Why are my CRM reports wrong?,Perplexity,no,tidybase,made-up test
+2026-09-15,How do I remove duplicate contacts?,Perplexity,no,tidybase,made-up test
+2026-10-15,What is data hygiene?,ChatGPT,no,tidybase,made-up test
+2026-10-15,How do I find duplicate contacts in my CRM?,ChatGPT,mentioned,"cleanly, tidybase",made-up test
+2026-10-15,Why are my CRM reports wrong?,ChatGPT,mentioned,"cleanly, tidybase",made-up test
+2026-10-15,How do I remove duplicate contacts?,ChatGPT,yes,cleanly,made-up test
+2026-10-15,What is data hygiene?,Perplexity,mentioned,"cleanly, tidybase",made-up test
+2026-10-15,How do I find duplicate contacts in my CRM?,Perplexity,yes,cleanly,made-up test
+2026-10-15,Why are my CRM reports wrong?,Perplexity,no,tidybase,made-up test
+2026-10-15,How do I remove duplicate contacts?,Perplexity,yes,cleanly,made-up test

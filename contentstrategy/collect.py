@@ -10,7 +10,7 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.robotparser import RobotFileParser
 
-UA = "b2b-content-topic-miner/0.1 (personal research; contact: see repository)"
+UA = "b2b-content-strategy-assistant/0.1 (personal research; contact: see repository)"
 MAX_BYTES = 2_000_000
 
 

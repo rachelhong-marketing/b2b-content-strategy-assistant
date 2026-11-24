@@ -6,7 +6,7 @@ import json
 from datetime import date
 from pathlib import Path
 
-from . import collect, competitors
+from . import citations, collect, competitors
 from .cli import _load_items, mine
 
 
@@ -77,6 +77,9 @@ def run(data, out_dir, collect_config=None, as_of=None, today=None):
     L += ["", "## Competitor activity", ""]
     real_new = {k: v for k, v in comp_new.items() if not v["baseline"] and v["new"]}
     L += [f"- {k}: {len(v['new'])} new" for k, v in real_new.items()] or ["- Nothing new since the last run." if last else "- Baseline saved."]
+    cit = citations.summary(data)
+    if not cit[0].startswith("No tests"):
+        L += ["", "## AI answer citations (manual tests)", ""] + cit
     L += ["", f"Full brief: {brief.name}", ""]
     note = out_dir / f"{stamp}-what-changed.md"
     note.write_text("\n".join(L), encoding="utf-8")

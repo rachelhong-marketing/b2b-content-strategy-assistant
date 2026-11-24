@@ -3,8 +3,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from topicminer import brand, check, collect, competitors, funnel, keywords, report, sources, topics, cli
-from topicminer.util import to_number, parse_date
+from contentstrategy import brand, check, collect, competitors, funnel, keywords, report, sources, topics, cli
+from contentstrategy.util import to_number, parse_date
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "sample-data"
@@ -186,7 +186,7 @@ class Weekly(unittest.TestCase):
         return dst
 
     def test_first_run_is_baseline_then_second_run_has_no_changes(self):
-        from topicminer import weekly
+        from contentstrategy import weekly
         with tempfile.TemporaryDirectory() as d:
             data, out = self._copy(d), Path(d) / "out"
             r1 = weekly.run(data, out)
@@ -199,7 +199,7 @@ class Weekly(unittest.TestCase):
             self.assertIn("Nothing new since the last run", note)
 
     def test_new_competitor_post_shows_up(self):
-        from topicminer import weekly
+        from contentstrategy import weekly
         with tempfile.TemporaryDirectory() as d:
             data, out = self._copy(d), Path(d) / "out"
             weekly.run(data, out)
@@ -211,7 +211,7 @@ class Weekly(unittest.TestCase):
             self.assertIn("tidybase: 1 new", note)
 
     def test_chosen_topics_are_hidden(self):
-        from topicminer import weekly
+        from contentstrategy import weekly
         with tempfile.TemporaryDirectory() as d:
             data, out = self._copy(d), Path(d) / "out"
             r = weekly.run(data, out)
@@ -224,7 +224,7 @@ class Weekly(unittest.TestCase):
             self.assertNotIn(first[0], weekly._top_ideas(Path(r2["brief"]).read_text()))
 
     def test_failure_is_reported_not_raised(self):
-        from topicminer import weekly
+        from contentstrategy import weekly
         with tempfile.TemporaryDirectory() as d:
             data = self._copy(d)
             (data / "brand" / "brand-profile.json").write_text("not json")
@@ -239,6 +239,104 @@ class Weekly(unittest.TestCase):
             cfg.write_text(json.dumps([{"name": "ok", "url": "https://ok.example/feed.xml", "folder": "trade"}]))
             collect.run(cfg, Path(d) / "out", fetcher=lambda u: pages.get(u, (404, "")), sleep=lambda s: None)
             self.assertTrue((Path(d) / "out" / "trade" / "ok.xml").exists())
+
+
+class Aeo(unittest.TestCase):
+    BRAND = brand.load(DATA / "brand" / "brand-profile.json")
+    GOOD = (DATA / "drafts" / "how-to-spot-duplicate-records.md").read_text()
+
+    def levels(self, text):
+        from contentstrategy import aeo
+        return aeo.check_draft(text, self.BRAND, "2026-10-23")
+
+    def test_sample_draft_passes(self):
+        self.assertEqual(self.levels(self.GOOD), [])
+
+    def test_missing_placeholders_fail(self):
+        res = self.levels(self.GOOD.replace("author: Sam Example, Head of Revenue Operations", "author: [MISSING: name]"))
+        self.assertTrue(any(l == "FAIL" and "author" in m for l, m in res))
+
+    def test_acronym_must_be_spelled_out(self):
+        res = self.levels(self.GOOD.replace("customer relationship management (CRM)", "CRM"))
+        self.assertTrue(any("acronym 'CRM'" in m for l, m in res))
+
+    def test_long_opening_answer_fails(self):
+        first = self.GOOD.split("\n# ", 1)[1].split("\n\n", 2)[1]
+        res = self.levels(self.GOOD.replace(first, "word " * 90))
+        self.assertTrue(any("first paragraph" in m and l == "FAIL" for l, m in res))
+
+    def test_avoid_word_and_brand_name_variants(self):
+        res = self.levels(self.GOOD.replace("Fernhill Software built", "Fernhill software is revolutionary and built"))
+        msgs = " ".join(m for _, m in res)
+        self.assertIn("revolutionary", msgs)
+        self.assertIn("more than one way", msgs)
+
+    def test_no_faq_fails_and_stale_date_warns(self):
+        res = self.levels(self.GOOD.split("## Frequently asked questions")[0].replace("updated: 2026-10-20", "updated: 2025-01-01"))
+        self.assertTrue(any(l == "FAIL" and "FAQ" in m for l, m in res))
+        self.assertTrue(any(l == "WARN" and "12 months" in m for l, m in res))
+
+
+class Schema(unittest.TestCase):
+    def test_article_and_faq_graph(self):
+        from contentstrategy import schema
+        g = schema.build((DATA / "drafts" / "how-to-spot-duplicate-records.md").read_text(), brand.load(DATA / "brand" / "brand-profile.json"))
+        kinds = [n["@type"] for n in g["@graph"]]
+        self.assertEqual(kinds, ["Article", "FAQPage"])
+        self.assertEqual(len(g["@graph"][1]["mainEntity"]), 4)
+        self.assertEqual(g["@graph"][0]["author"]["name"], "Sam Example")
+        json.dumps(g)
+
+
+class Outline(unittest.TestCase):
+    def test_outline_is_a_valid_unfinished_draft(self):
+        from contentstrategy import aeo, outline
+        ctx = cli.analyze(DATA, top=50)
+        idea = outline.find_idea(ctx["ideas"], "duplicate contacts")
+        text = outline.build(idea, ctx["brand"], ctx["inventory"], ctx["as_of"])
+        self.assertIn("title: ", text)
+        self.assertIn("[MISSING", text)
+        self.assertGreaterEqual(len(aeo.faq_pairs(aeo.sections(aeo.notes_stripped(aeo.parse(text)[1])))), 3)
+        res = aeo.check_draft(text, ctx["brand"], ctx["as_of"])
+        self.assertTrue(any("[MISSING]" in m for l, m in res))
+
+    def test_unknown_idea_raises(self):
+        from contentstrategy import outline
+        with self.assertRaises(ValueError):
+            outline.find_idea([], "nothing")
+
+
+class Campaign(unittest.TestCase):
+    def test_off_theme_ideas_are_scored_lower_and_labeled(self):
+        ctx = cli.analyze(DATA, top=50)
+        off = [x for x in ctx["ideas"] if not x["on_campaign"]]
+        self.assertTrue(off)
+        self.assertIn("outside the campaign theme", ctx["text"])
+        b = brand.load(DATA / "brand" / "brand-profile.json")
+        self.assertEqual(set(b["campaign"]["themes"]) - set(b["themes"]), set())
+
+    def test_bad_campaign_theme_is_rejected(self):
+        with tempfile.TemporaryDirectory() as d:
+            b = json.loads((DATA / "brand" / "brand-profile.json").read_text())
+            b["campaign"]["themes"] = ["not a theme"]
+            p = Path(d) / "b.json"
+            p.write_text(json.dumps(b))
+            with self.assertRaises(ValueError):
+                brand.load(p)
+
+
+class Citations(unittest.TestCase):
+    def test_sheet_adds_rows_once_and_report_counts(self):
+        from contentstrategy import citations
+        with tempfile.TemporaryDirectory() as d:
+            n1 = citations.add_sheet(d, ["Why are reports wrong?"])
+            n2 = citations.add_sheet(d, ["Why are reports wrong?"])
+            self.assertEqual((n1, n2), (5, 0))
+            self.assertIn("No tests logged", citations.summary(d)[0])
+        lines = "\n".join(citations.summary(DATA))
+        self.assertIn("16 tests logged", lines)
+        self.assertIn("too few tests to compare", lines)
+        self.assertIn("tidybase", lines)
 
 
 class Hygiene(unittest.TestCase):

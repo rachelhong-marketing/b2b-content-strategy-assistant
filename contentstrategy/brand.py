@@ -14,4 +14,13 @@ def load(path):
         if not t.get("triggers"):
             raise ValueError(f"theme '{name}' needs at least one trigger phrase")
         t.setdefault("fit", 0.5)
+    b.setdefault("product", b["brand"])
+    b.setdefault("known_acronyms", [])
+    c = b.get("campaign")
+    if c:
+        unknown = [t for t in c.get("themes", []) if t not in b["themes"]]
+        if unknown:
+            raise ValueError(f"campaign themes not in the theme list: {', '.join(unknown)}")
+        c.setdefault("pillars", [])
+        c.setdefault("audience", "")
     return b

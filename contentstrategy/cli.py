@@ -49,7 +49,8 @@ def load_chosen(data):
     return {r["text"].strip().lower() for r in read_csv_rows(p) if r.get("text")} if p.exists() else set()
 
 
-def mine(data, out, as_of=None, top=8):
+def analyze(data, as_of=None, top=8):
+    """Everything the brief and the other commands need, as one dict."""
     data = Path(data)
     b = brandmod.load(data / "brand" / "brand-profile.json")
     items, counts = _load_items(data)
@@ -88,13 +89,18 @@ def mine(data, out, as_of=None, top=8):
     comp_new = competitors.new_since(items, snap)
     text = report.build(b, as_of, counts, table, by_stage, topics.emerging_phrases(items, b["themes"]), comp_new,
                         competitors.theme_counts(items, b["themes"]), refresh, inv_stage, ebooks, gaps)
+    return dict(text=text, items=items, ideas=ideas, brand=b, inventory=inventory, keywords=kws, as_of=as_of, table=table, by_stage=by_stage)
+
+
+def mine(data, out, as_of=None, top=8):
+    ctx = analyze(data, as_of, top)
     Path(out).parent.mkdir(parents=True, exist_ok=True)
-    Path(out).write_text(text, encoding="utf-8")
-    return text, items
+    Path(out).write_text(ctx["text"], encoding="utf-8")
+    return ctx["text"], ctx["items"]
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="topicminer", description="Turn audience questions, news, competitor activity and keyword data into ranked content topics by funnel stage.")
+    ap = argparse.ArgumentParser(prog="contentstrategy", description="Turn audience questions, news, competitor activity and keyword data into ranked content topics by funnel stage.")
     sub = ap.add_subparsers(dest="cmd", required=True)
     m = sub.add_parser("mine", help="build the topic brief from a data folder")
     m.add_argument("--data", required=True)
@@ -109,6 +115,25 @@ def main(argv=None):
     w.add_argument("--data", required=True)
     w.add_argument("--out-dir", default="output/weekly")
     w.add_argument("--collect-config")
+    o = sub.add_parser("outline", help="turn one chosen idea into a writing brief")
+    o.add_argument("--data", required=True)
+    o.add_argument("--idea", required=True, help="the idea's text, or part of it")
+    o.add_argument("--out-dir", default="output/drafts")
+    o.add_argument("--as-of")
+    k = sub.add_parser("aeo-check", help="check a draft for answer engine and AI search readiness")
+    k.add_argument("draft")
+    k.add_argument("--brand", required=True)
+    k.add_argument("--as-of")
+    s = sub.add_parser("schema", help="build JSON-LD structured data (Article and FAQPage) from a finished draft")
+    s.add_argument("draft")
+    s.add_argument("--brand", required=True)
+    s.add_argument("--url")
+    s.add_argument("--out")
+    cs = sub.add_parser("citation-sheet", help="add buyer questions to the manual AI citation test log")
+    cs.add_argument("--data", required=True)
+    cs.add_argument("--max", type=int, default=10)
+    cr = sub.add_parser("citation-report", help="summarize the AI citation test log")
+    cr.add_argument("--data", required=True)
     f = sub.add_parser("classify", help="which funnel stage is this?")
     f.add_argument("text")
     g = sub.add_parser("collect", help="download feeds and sitemaps you list (obeys robots.txt)")
@@ -125,6 +150,37 @@ def main(argv=None):
         res = weekly.run(a.data, a.out_dir, a.collect_config)
         print(Path(res["note"]).read_text())
         return 0 if res["ok"] else 1
+    elif a.cmd == "outline":
+        from . import outline as outlinemod
+        ctx = analyze(a.data, a.as_of, top=50)
+        idea = outlinemod.find_idea(ctx["ideas"], a.idea)
+        text = outlinemod.build(idea, ctx["brand"], ctx["inventory"], ctx["as_of"])
+        dest = Path(a.out_dir) / f"{outlinemod.slug(idea['text'])}-draft.md"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(text, encoding="utf-8")
+        print(f"Wrote {dest}")
+    elif a.cmd == "aeo-check":
+        from . import aeo
+        res = aeo.check_draft(Path(a.draft).read_text(encoding="utf-8"), brandmod.load(a.brand), a.as_of)
+        print(aeo.format_results(res))
+        return 1 if any(l == "FAIL" for l, _ in res) else 0
+    elif a.cmd == "schema":
+        from . import schema as schemamod
+        out = schemamod.dumps(schemamod.build(Path(a.draft).read_text(encoding="utf-8"), brandmod.load(a.brand), a.url))
+        if a.out:
+            Path(a.out).write_text(out, encoding="utf-8")
+            print(f"Wrote {a.out}")
+        else:
+            print(out)
+    elif a.cmd == "citation-sheet":
+        from . import citations
+        ctx = analyze(a.data, top=50)
+        qs = [x["text"] for x in sorted(ctx["ideas"], key=lambda x: -x["score"]) if topics.is_question(x["text"]) and x["on_campaign"] and not x["hidden"]][: a.max]
+        n = citations.add_sheet(a.data, qs)
+        print(f"Added {n} test rows for {len(qs)} questions to {citations.log_path(a.data)}")
+    elif a.cmd == "citation-report":
+        from . import citations
+        print("\n".join(citations.summary(a.data)))
     elif a.cmd == "check":
         probs = checkmod.check_brief(Path(a.brief).read_text(encoding="utf-8"), brandmod.load(a.brand))
         print("\n".join(probs) if probs else "Brief OK")
