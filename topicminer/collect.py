@@ -36,7 +36,7 @@ def allowed(url, fetcher=fetch):
 
 
 def run(config_path, outdir, fetcher=fetch, sleep=time.sleep, delay=3.0):
-    """Config: a JSON list of {"name": "...", "url": "..."}. Returns a list of (name, result) lines."""
+    """Config: a JSON list of {"name": "...", "url": "...", "folder": "trade" or "competitors" (optional)}. Returns (name, result) lines."""
     cfg = json.loads(Path(config_path).read_text())
     out = Path(outdir)
     out.mkdir(parents=True, exist_ok=True)
@@ -52,6 +52,8 @@ def run(config_path, outdir, fetcher=fetch, sleep=time.sleep, delay=3.0):
         if status != 200 or not body.strip():
             results.append((name, f"failed: status {status}"))
             continue
-        (out / f"{name}.xml").write_text(body, encoding="utf-8")
+        dest = out / src["folder"] if src.get("folder") else out
+        dest.mkdir(parents=True, exist_ok=True)
+        (dest / f"{name}.xml").write_text(body, encoding="utf-8")
         results.append((name, f"saved {len(body):,} characters"))
     return results

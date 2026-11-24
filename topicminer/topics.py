@@ -87,7 +87,7 @@ def emerging_phrases(items, themes, min_items=3, top=6):
     return [(p, c) for p, c in df.most_common(top * 3) if c >= min_items][:top]
 
 
-def ideas_by_stage(themetable, items, keywords, brand, rules, as_of, top=8):
+def ideas_by_stage(themetable, items, keywords, brand, rules, as_of, top=8, hide=()):
     """Topic ideas from three kinds of evidence: keywords people search, questions people ask, headlines in the news.
     Each idea is placed in a funnel stage and scored: half from its theme's score, half from its own signal."""
     themes = brand["themes"]
@@ -104,10 +104,11 @@ def ideas_by_stage(themetable, items, keywords, brand, rules, as_of, top=8):
         if key in seen:
             return
         seen.add(key)
+        hidden = key in hide
         found = themes_for(text, themes)
         theme = max(found, key=lambda n: score_of.get(n, 0)) if found else ""
         stage, why = classify(text, rules)
-        ideas.append(dict(kind=kind, text=text, stage=stage, matched=why, theme=theme,
+        ideas.append(dict(kind=kind, text=text, stage=stage, matched=why, theme=theme, hidden=hidden,
                           score=round(0.5 * score_of.get(theme, 0.0) + 0.5 * 100 * signal, 1), format=FORMATS[stage], **extra))
 
     for k, v in keywords.items():
@@ -122,5 +123,5 @@ def ideas_by_stage(themetable, items, keywords, brand, rules, as_of, top=8):
             age = days_between(as_of, it["date"]) if it.get("date") else None
             fresh = 0.3 if age is None else max(0.0, 1 - age / RECENT_DAYS)
             add("headline", it["title"], 0.5 * fresh, item=it)
-    by_stage = {s: sorted([x for x in ideas if x["stage"] == s and x["score"] >= 5], key=lambda x: -x["score"])[:top] for s in STAGES}
+    by_stage = {s: sorted([x for x in ideas if x["stage"] == s and x["score"] >= 5 and not x["hidden"]], key=lambda x: -x["score"])[:top] for s in STAGES}
     return by_stage, ideas

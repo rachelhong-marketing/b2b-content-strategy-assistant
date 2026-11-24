@@ -94,6 +94,16 @@ Each theme gets a score from 0 to 100, made of eight parts. Every part is scaled
 
 An idea's score is half its theme's score and half its own signal (search volume and ease for keywords, engagement for questions, freshness for headlines). The weights are in `topicminer/topics.py`.
 
+## Three ways to use it
+
+| Way | What you do | Files |
+|---|---|---|
+| Skill (on demand) | Ask Claude Code to mine topics from a data folder | `.claude/skills/topic-miner/SKILL.md` |
+| Agent (weekly) | Copy `.claude/agents/topic-miner.md` into your project, then schedule `prompts/weekly-run.md`. It compares with last week and remembers topics you chose | `.claude/agents/`, `prompts/`, `docs/agent-spec.md` |
+| Copilot (judgment only) | Paste the brief into a Copilot agent; no code runs | `copilot/` |
+
+Weekly command: `python3 -m topicminer weekly --data <folder> --out-dir output/weekly [--collect-config collect-config.json]`. Memory lives in `<folder>/state/`. Keep your own data folder private.
+
 ## Guardrails and limits
 
 - **Evidence first.** Every idea has a link or keyword data next to it. Gaps are marked [MISSING]. The `check` command fails a brief without evidence or with words on your avoid list.
@@ -109,11 +119,14 @@ An idea's score is half its theme's score and half its own signal (search volume
 
 ```
 .claude/skills/topic-miner/SKILL.md   the skill
-topicminer/                           sources, keywords, funnel, topics, competitors, report, check, collect
+.claude/agents/topic-miner.md         the weekly agent
+prompts/weekly-run.md                 schedule prompt
+copilot/                              Copilot instructions and setup
+topicminer/                           sources, keywords, funnel, topics, competitors, report, check, collect, weekly
 rules/funnel-patterns.csv             funnel stage rules
 sample-data/                          made-up brand, feeds, posts, keyword exports, competitor files
-docs/                                 data guide and an example brief
-tests/                                24 tests
+docs/                                 data guide, example brief, agent spec
+tests/                                29 tests
 ```
 
 ## B2B Campaign Lifecycle Toolkit

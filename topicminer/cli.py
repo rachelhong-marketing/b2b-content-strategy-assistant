@@ -44,6 +44,11 @@ def _load_keywords(data):
     return merged, {"Google Ads Keyword Planner keywords": len(ga), "Semrush keywords": len(sr), "Google Trends terms": len(tr)}
 
 
+def load_chosen(data):
+    p = Path(data) / "state" / "chosen-topics.csv"
+    return {r["text"].strip().lower() for r in read_csv_rows(p) if r.get("text")} if p.exists() else set()
+
+
 def mine(data, out, as_of=None, top=8):
     data = Path(data)
     b = brandmod.load(data / "brand" / "brand-profile.json")
@@ -57,7 +62,9 @@ def mine(data, out, as_of=None, top=8):
     as_of = as_of or (max(dates) if dates else "")
     rules = funnel.load_rules()
     table = topics.theme_table(items, kws, b, as_of, inventory)
-    by_stage, ideas = topics.ideas_by_stage(table, items, kws, b, rules, as_of, top)
+    chosen = load_chosen(data)
+    by_stage, ideas = topics.ideas_by_stage(table, items, kws, b, rules, as_of, top, hide=chosen)
+    counts["Ideas hidden because you already chose them"] = sum(1 for x in ideas if x["text"].lower().strip() in chosen) or "0 (none chosen yet)"
     ebooks = []
     for t in table:
         mine_ = [x for x in ideas if x["theme"] == t["theme"]]
@@ -98,6 +105,10 @@ def main(argv=None):
     c = sub.add_parser("check", help="check a finished brief")
     c.add_argument("brief")
     c.add_argument("--brand", required=True)
+    w = sub.add_parser("weekly", help="the weekly run: collect, mine, compare with last week, remember")
+    w.add_argument("--data", required=True)
+    w.add_argument("--out-dir", default="output/weekly")
+    w.add_argument("--collect-config")
     f = sub.add_parser("classify", help="which funnel stage is this?")
     f.add_argument("text")
     g = sub.add_parser("collect", help="download feeds and sitemaps you list (obeys robots.txt)")
@@ -109,6 +120,11 @@ def main(argv=None):
         if a.save_snapshot:
             (Path(a.data) / "competitors" / "snapshot.json").write_text(json.dumps(competitors.snapshot_of(items), indent=1))
         print(f"Wrote {a.out} ({len(text.splitlines())} lines)")
+    elif a.cmd == "weekly":
+        from . import weekly
+        res = weekly.run(a.data, a.out_dir, a.collect_config)
+        print(Path(res["note"]).read_text())
+        return 0 if res["ok"] else 1
     elif a.cmd == "check":
         probs = checkmod.check_brief(Path(a.brief).read_text(encoding="utf-8"), brandmod.load(a.brand))
         print("\n".join(probs) if probs else "Brief OK")

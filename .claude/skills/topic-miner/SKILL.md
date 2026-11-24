@@ -24,6 +24,9 @@ Turns evidence into a ranked list of content topics by funnel stage. You do the 
 5. **Check it:** `python3 -m topicminer check output/topic-brief.md --brand <brand-profile.json>`
 6. **Hand over** a short brainstorm agenda: 2 or 3 themes, one idea per stage each, one ebook or pillar candidate, and the SEO fixes (page-two pages to refresh, themes with demand and no page).
 
+## Weekly agent
+For a recurring run, use the `topic-miner` agent (`.claude/agents/topic-miner.md`) and `python3 -m topicminer weekly --data <folder>`. It saves a what-changed note, remembers last run in `<folder>/state/`, and hides ideas listed in `state/chosen-topics.csv`.
+
 ## Rules
 - Every idea needs its evidence next to it: a link, or keyword data with its source. If something is missing, write [MISSING]. Never invent a volume, difficulty, ranking or quote.
 - Competitor activity is public information only. Do not copy their content. Use it to find gaps and angles.

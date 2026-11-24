@@ -178,6 +178,69 @@ class Collect(unittest.TestCase):
             self.assertEqual(slept, [3, 3])
 
 
+class Weekly(unittest.TestCase):
+    def _copy(self, d):
+        import shutil
+        dst = Path(d) / "data"
+        shutil.copytree(DATA, dst)
+        return dst
+
+    def test_first_run_is_baseline_then_second_run_has_no_changes(self):
+        from topicminer import weekly
+        with tempfile.TemporaryDirectory() as d:
+            data, out = self._copy(d), Path(d) / "out"
+            r1 = weekly.run(data, out)
+            self.assertTrue(r1["ok"])
+            self.assertIn("First run", Path(r1["note"]).read_text())
+            self.assertTrue((data / "state" / "last-run.json").exists())
+            r2 = weekly.run(data, out)
+            note = Path(r2["note"]).read_text()
+            self.assertIn("Compared with the run of", note)
+            self.assertIn("Nothing new since the last run", note)
+
+    def test_new_competitor_post_shows_up(self):
+        from topicminer import weekly
+        with tempfile.TemporaryDirectory() as d:
+            data, out = self._copy(d), Path(d) / "out"
+            weekly.run(data, out)
+            feed = data / "competitors" / "tidybase-feed.xml"
+            txt = feed.read_text()
+            item = "<item><title>Brand new post about pipeline reporting</title><link>https://tidybase.example/new</link><pubDate>Mon, 19 Oct 2026 09:00:00 GMT</pubDate></item>"
+            feed.write_text(txt.replace("<item>", item + "<item>", 1))
+            note = Path(weekly.run(data, out)["note"]).read_text()
+            self.assertIn("tidybase: 1 new", note)
+
+    def test_chosen_topics_are_hidden(self):
+        from topicminer import weekly
+        with tempfile.TemporaryDirectory() as d:
+            data, out = self._copy(d), Path(d) / "out"
+            r = weekly.run(data, out)
+            first = weekly._top_ideas(Path(r["brief"]).read_text())
+            self.assertTrue(first)
+            state = data / "state"
+            state.mkdir(exist_ok=True)
+            (state / "chosen-topics.csv").write_text("text\n" + first[0] + "\n")
+            r2 = weekly.run(data, out)
+            self.assertNotIn(first[0], weekly._top_ideas(Path(r2["brief"]).read_text()))
+
+    def test_failure_is_reported_not_raised(self):
+        from topicminer import weekly
+        with tempfile.TemporaryDirectory() as d:
+            data = self._copy(d)
+            (data / "brand" / "brand-profile.json").write_text("not json")
+            r = weekly.run(data, Path(d) / "out")
+            self.assertFalse(r["ok"])
+            self.assertIn("failed", Path(r["note"]).read_text())
+
+    def test_collect_folder_option(self):
+        pages = {"https://ok.example/robots.txt": (404, ""), "https://ok.example/feed.xml": (200, "<rss/>")}
+        with tempfile.TemporaryDirectory() as d:
+            cfg = Path(d) / "c.json"
+            cfg.write_text(json.dumps([{"name": "ok", "url": "https://ok.example/feed.xml", "folder": "trade"}]))
+            collect.run(cfg, Path(d) / "out", fetcher=lambda u: pages.get(u, (404, "")), sleep=lambda s: None)
+            self.assertTrue((Path(d) / "out" / "trade" / "ok.xml").exists())
+
+
 class Hygiene(unittest.TestCase):
     def test_no_real_company_names_or_personal_details(self):
         banned = ["epsilon", "walmart", "pubmatic", "neustar", "rachel", "@gmail"]
