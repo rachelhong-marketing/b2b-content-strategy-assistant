@@ -38,7 +38,7 @@ class Sources(unittest.TestCase):
         self.assertLessEqual(len(it["text"]), 300)
 
     def test_sitemap_titles_are_marked_derived(self):
-        items = sources.parse_sitemap((DATA / "competitors" / "cleanly-sitemap.xml").read_text(), "cleanly")
+        items = sources.parse_sitemap((DATA / "competitors" / "datavault-sitemap.xml").read_text(), "datavault")
         self.assertTrue(all(i["title_derived"] for i in items))
         self.assertIn("crm migration data prep", [i["title"] for i in items])
 
@@ -81,7 +81,7 @@ class Funnel(unittest.TestCase):
 
     def test_stages(self):
         self.assertEqual(funnel.classify("what is data hygiene", self.rules)[0], "TOFU")
-        self.assertEqual(funnel.classify("tidybase vs fernhill", self.rules)[0], "MOFU")
+        self.assertEqual(funnel.classify("clearline vs fernhill", self.rules)[0], "MOFU")
         self.assertEqual(funnel.classify("data quality software pricing", self.rules)[0], "BOFU")
 
     def test_cost_alone_is_not_bottom_of_funnel(self):
@@ -128,13 +128,13 @@ class Mining(unittest.TestCase):
     def test_competitor_diff_against_snapshot(self):
         snap = competitors.load_snapshot(DATA / "competitors" / "snapshot.json")
         new = competitors.new_since(self.items, snap)
-        self.assertEqual(len(new["tidybase"]["new"]), 2)
-        self.assertFalse(new["tidybase"]["baseline"])
-        self.assertEqual(len(new["cleanly"]["new"]), 3)
+        self.assertEqual(len(new["clearline"]["new"]), 2)
+        self.assertFalse(new["clearline"]["baseline"])
+        self.assertEqual(len(new["datavault"]["new"]), 3)
 
     def test_first_run_is_baseline(self):
         new = competitors.new_since(self.items, {})
-        self.assertTrue(new["tidybase"]["baseline"])
+        self.assertTrue(new["clearline"]["baseline"])
 
     def test_no_keyword_data_still_works_and_says_so(self):
         with tempfile.TemporaryDirectory() as d:
@@ -203,12 +203,12 @@ class Weekly(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             data, out = self._copy(d), Path(d) / "out"
             weekly.run(data, out)
-            feed = data / "competitors" / "tidybase-feed.xml"
+            feed = data / "competitors" / "clearline-feed.xml"
             txt = feed.read_text()
-            item = "<item><title>Brand new post about pipeline reporting</title><link>https://tidybase.example/new</link><pubDate>Mon, 19 Oct 2026 09:00:00 GMT</pubDate></item>"
+            item = "<item><title>Brand new post about pipeline reporting</title><link>https://clearline.example/new</link><pubDate>Mon, 19 Oct 2026 09:00:00 GMT</pubDate></item>"
             feed.write_text(txt.replace("<item>", item + "<item>", 1))
             note = Path(weekly.run(data, out)["note"]).read_text()
-            self.assertIn("tidybase: 1 new", note)
+            self.assertIn("clearline: 1 new", note)
 
     def test_chosen_topics_are_hidden(self):
         from contentstrategy import weekly
@@ -253,7 +253,7 @@ class Aeo(unittest.TestCase):
         self.assertEqual(self.levels(self.GOOD), [])
 
     def test_missing_placeholders_fail(self):
-        res = self.levels(self.GOOD.replace("author: Sam Example, Head of Revenue Operations", "author: [MISSING: name]"))
+        res = self.levels(self.GOOD.replace("author: Sam Example, Head of Data Engineering", "author: [MISSING: name]"))
         self.assertTrue(any(l == "FAIL" and "author" in m for l, m in res))
 
     def test_acronym_must_be_spelled_out(self):
@@ -336,7 +336,7 @@ class Citations(unittest.TestCase):
         lines = "\n".join(citations.summary(DATA))
         self.assertIn("16 tests logged", lines)
         self.assertIn("too few tests to compare", lines)
-        self.assertIn("tidybase", lines)
+        self.assertIn("clearline", lines)
 
 
 class Hygiene(unittest.TestCase):

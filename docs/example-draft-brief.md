@@ -3,8 +3,8 @@ title: How to remove duplicate contacts?
 primary_question: How to remove duplicate contacts?
 funnel_stage: TOFU
 theme: duplicate records
-campaign: Trusted CRM data
-audience: RevOps manager
+campaign: 2026-Q3 Clean Customer Data
+audience: Data leader
 author: [MISSING: a real person's name and role]
 date: [MISSING: publish date, YYYY-MM-DD]
 updated: [MISSING: last updated, YYYY-MM-DD]
@@ -48,10 +48,10 @@ original_angle: [MISSING: what do you know that other pages do not? A number, a 
 Prepared as of 2026-10-23. Format suggested: Blog post or explainer.
 
 **Campaign**
-- Theme: Your reports are only as good as your records
-- Pillar: Find duplicates before they reach reports
-- Pillar: Fix once, keep it fixed
-- Pillar: Numbers leadership can trust
+- Theme: One customer, one record
+- Pillar: Find them: see how many duplicate records you have
+- Pillar: Merge them: one record per customer, without breaking reports
+- Pillar: Keep them out: monitoring so duplicates don't come back
 
 **Evidence for this idea**
 - Keyword data for 'how to remove duplicate contacts': volume 3600.0, difficulty 41.0, source: your keyword export. Use the numbers as exported.
@@ -67,4 +67,4 @@ Prepared as of 2026-10-23. Format suggested: Blog post or explainer.
 - At least 2 outside sources linked, and one original element (your data, a customer example, a decision rule).
 - A list or table where it helps. A real author name and a visible date.
 - Spell out every acronym on first use. Use the brand and product names exactly the same way every time.
-- Words to avoid: revolutionary, game-changing, unleash, cutting-edge.
+- Words to avoid: best-in-class, world-class, revolutionary, game-changer, cutting-edge, seamless, synergy, leverage.

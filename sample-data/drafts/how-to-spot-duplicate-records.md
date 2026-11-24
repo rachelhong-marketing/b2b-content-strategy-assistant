@@ -3,9 +3,9 @@ title: How do you spot duplicate records in your customer relationship managemen
 primary_question: How do you spot duplicate records in your customer relationship management (CRM) system?
 funnel_stage: TOFU
 theme: duplicate records
-campaign: Trusted CRM data
-audience: RevOps manager
-author: Sam Example, Head of Revenue Operations
+campaign: 2026-Q3 Clean Customer Data
+audience: Data leader
+author: Sam Example, Head of Data Engineering
 date: 2026-10-20
 updated: 2026-10-20
 original_angle: In our made-up sample of 5,000 contacts, 1 in 9 had a twin that differed by one character.

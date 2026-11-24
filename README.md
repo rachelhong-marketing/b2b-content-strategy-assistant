@@ -6,7 +6,7 @@
 
 An AI assistant for B2B content strategy, in four jobs. It finds topics inside your campaign theme (from what your audience asks, what the press covers, what competitors publish and what people search for), ranks them by funnel stage with the evidence next to each one, helps write each piece in your voice, and checks that the piece is built for answer engine optimization (AEO, being quoted as the answer in search) and generative engine optimization (GEO, being cited by AI tools such as ChatGPT and Perplexity). It runs as a Claude Code skill and agent, with a small Python tool (standard library only) that does the counting and the checking.
 
-All data here is made up. Fernhill Software is a fictional company that sells software to clean up duplicate and messy customer records in a CRM.
+All data here is made up. Fernhill Software is a fictional company. It sells the Fernhill Data Quality Platform, which finds and merges duplicate customer records across systems. The same company, product, buyers and competitors appear in the Campaign Assistant and the Product Marketing Agent.
 
 ## Why this exists
 
@@ -84,11 +84,12 @@ python3 -m unittest discover -s tests
 
 ## Example output
 
-From the sample data (full file: [docs/example-topic-brief.md](docs/example-topic-brief.md)):
+From the sample data (full file: [docs/example-topic-brief.md](docs/example-topic-brief.md)). The sample is the same fictional company, product, buyers, competitors and campaign as the [Campaign Assistant](https://github.com/rachelhong-marketing/b2b-campaign-assistant) and the [Product Marketing Agent](https://github.com/rachelhong-marketing/b2b-product-marketing-agent). The data is made up.
 
 | Theme | Score | Demand (monthly searches) | Trend | Sources | Competitors posted | You posted | Note |
+|---|---|---|---|---|---|---|---|
 | duplicate records | 80.3 | 6,590 | flat | example-martech-daily, example-revops-weekly, quora, reddit | 3 | 2 |  |
-| crm data cleanup | 75.7 | 6,610 | flat | example-martech-daily, example-revops-weekly, linkedin, quora, reddit | 1 | 2 |  |
+| customer data cleanup | 80.1 | 6,610 | flat | example-martech-daily, example-revops-weekly, linkedin, quora, reddit | 1 | 2 |  |
 | ai data readiness | 43.3 | 320 | up | example-martech-daily, example-revops-weekly, quora | 1 | 0 |  |
 | trusted reporting | 38.0 | 1,220 | unknown | example-martech-daily, example-revops-weekly, quora, reddit | 0 | 0 |  |
 | crm migration | 29.4 | 390 | unknown | example-revops-weekly, linkedin | 1 | 0 |  |
@@ -96,7 +97,7 @@ From the sample data (full file: [docs/example-topic-brief.md](docs/example-topi
 ```
 ## Top of funnel (learning) (TOFU)
 
-- **what is data hygiene**, score 86.8, theme: crm data cleanup, suggested format: Blog post or explainer
+- **what is data hygiene**, score 89.0, theme: customer data cleanup, suggested format: Blog post or explainer
   - Keyword data: volume 5,400, difficulty 35, cost per click $2.10 (Semrush), trend unknown (google ads, semrush); stage rule: TOFU (matched a rule)
 - **how to remove duplicate contacts**, score 76.0, theme: duplicate records, suggested format: Blog post or explainer
   - Keyword data: volume 3,600, difficulty 41, cost per click $2.60 (Semrush), trend unknown (google ads, semrush); stage rule: TOFU (matched a rule)

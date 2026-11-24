@@ -1,4 +1,4 @@
 [
   {"name": "example-revops-weekly", "url": "https://example.com/feed.xml", "folder": "trade"},
-  {"name": "tidybase-feed", "url": "https://example.com/competitor/feed.xml", "folder": "competitors"}
+  {"name": "clearline-feed", "url": "https://example.com/competitor/feed.xml", "folder": "competitors"}
 ]

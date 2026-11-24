@@ -1,18 +1,22 @@
 {
   "brand": "Fernhill Software",
-  "note": "Made-up example. Fernhill is a fictional company that sells software to clean up duplicate and messy customer records in a CRM.",
+  "note": "Made-up example. Fernhill is a fictional company that sells customer data quality software. The product, buyers, competitors and campaign match the sample in the Campaign Assistant repo.",
   "domain": "fernhill.example",
   "audiences": [
-    "RevOps manager",
-    "CRM administrator",
-    "Analytics lead"
+    "Data leader (VP of Data, Head of Data Engineering)",
+    "Analytics leader (Director of Analytics, BI Director)",
+    "Finance leader (CFO, VP Finance)"
   ],
-  "voice": "Plain, confident, practical. No fear-based messaging and no hype words.",
+  "voice": "Plain, confident, practical. Talk like a smart colleague, not a billboard.",
   "avoid_words": [
+    "best-in-class",
+    "world-class",
     "revolutionary",
-    "game-changing",
-    "unleash",
-    "cutting-edge"
+    "game-changer",
+    "cutting-edge",
+    "seamless",
+    "synergy",
+    "leverage"
   ],
   "themes": {
     "duplicate records": {
@@ -25,14 +29,15 @@
         "deduplication"
       ]
     },
-    "crm data cleanup": {
+    "customer data cleanup": {
       "fit": 1.0,
       "triggers": [
         "data cleanup",
         "crm cleanup",
         "clean crm",
         "messy data",
-        "data hygiene"
+        "data hygiene",
+        "customer data"
       ]
     },
     "trusted reporting": {
@@ -71,33 +76,36 @@
   },
   "competitors": [
     {
-      "name": "tidybase",
-      "note": "made-up competitor"
+      "name": "clearline",
+      "note": "made-up competitor: Clearline Data, one-time cleanup"
     },
     {
-      "name": "cleanly",
-      "note": "made-up competitor"
+      "name": "datavault",
+      "note": "made-up competitor: Datavault Pro, governance and compliance"
     }
   ],
-  "product": "Fernhill Cleanse",
+  "product": "Fernhill Data Quality Platform",
   "known_acronyms": [
     "FAQ",
-    "AI"
+    "AI",
+    "CFO",
+    "VP",
+    "BI"
   ],
   "campaign": {
-    "name": "Trusted CRM data",
-    "theme": "Your reports are only as good as your records",
-    "audience": "RevOps manager",
+    "name": "2026-Q3 Clean Customer Data",
+    "theme": "One customer, one record",
+    "audience": "Data leader",
     "themes": [
       "duplicate records",
-      "crm data cleanup",
+      "customer data cleanup",
       "trusted reporting"
     ],
     "pillars": [
-      "Find duplicates before they reach reports",
-      "Fix once, keep it fixed",
-      "Numbers leadership can trust"
+      "Find them: see how many duplicate records you have",
+      "Merge them: one record per customer, without breaking reports",
+      "Keep them out: monitoring so duplicates don't come back"
     ],
-    "note": "Made-up. In real use this block comes from the campaign assistant's master brief."
+    "note": "Made-up. Matches the sample master brief in the Campaign Assistant repo. In real use this block comes from your master brief."
   }
 }
