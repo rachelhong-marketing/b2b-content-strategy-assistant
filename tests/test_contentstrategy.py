@@ -343,7 +343,8 @@ class Hygiene(unittest.TestCase):
     def test_no_real_company_names_or_personal_details(self):
         banned = ["epsilon", "walmart", "pubmatic", "neustar", "rachel", "@gmail"]
         for p in ROOT.rglob("*"):
-            if p.is_file() and p.suffix in (".py", ".md", ".csv", ".json", ".xml") and "output" not in p.parts and "tests" not in p.parts and ".git" not in p.parts:
+            rel = p.relative_to(ROOT).parts
+            if p.is_file() and p.suffix in (".py", ".md", ".csv", ".json", ".xml") and "output" not in rel and "tests" not in rel and ".git" not in rel:
                 low = p.read_text(encoding="utf-8", errors="ignore").lower()
                 for w in banned:
                     if w in low and not (w == "rachel" and p.name in ("README.md", "LICENSE")):
