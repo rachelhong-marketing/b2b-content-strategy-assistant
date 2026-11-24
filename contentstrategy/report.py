@@ -1,4 +1,5 @@
 """Write the brainstorm brief as markdown. Every idea carries its evidence; anything missing is marked [MISSING]."""
+from . import performance as perfmod, scoring
 from .funnel import STAGES, STAGE_NAMES
 
 
@@ -29,19 +30,23 @@ def idea_lines(x):
     else:
         it = x["item"]
         ev = f"  - Evidence: {it['source']} headline, {it['date'] or 'undated'}, {it['url'] or '[MISSING link]'}; stage rule: {stage_note}"
-    return [head, ev]
+    left = ", ".join(x["left_out"]) if x.get("left_out") else ""
+    sc = f"  - Score parts: {scoring.parts_line(x['parts'])}" + (f"; left out and scaled up: {left}" if left else "")
+    pf = f"  - Past performance: {perfmod.note(x['perf'])}"
+    return [head, ev, sc, pf]
 
 
 def build(brand, as_of, counts, themetable, by_stage, emerging, comp_new, comp_themes, refresh, inventory_stage, ebooks, gaps):
     L = [f"# Content topic brief: {brand['brand']}", "",
          f"Prepared as of {as_of}. Audiences: {', '.join(brand['audiences'])}.",
-         *( [f"Campaign: {brand['campaign'].get('name', '')}. Theme: {brand['campaign'].get('theme', '')}. Ideas outside the campaign themes count for 60 percent of their score and are labeled.", ""] if brand.get("campaign") else [] ),
+         *( [f"Campaign: {brand['campaign'].get('name', '')}. Theme: {brand['campaign'].get('theme', '')}. Ideas outside the campaign themes score low on campaign relevance and are labeled.", ""] if brand.get("campaign") else [] ),
+         "Scores use seven factors: " + ", ".join(f"{scoring.LABELS[k].lower()} {round(100 * w)}%" for k, w in scoring.WEIGHTS.items()) + ". A factor with no data is left out and the others scale up. Each idea lists its parts.", "",
          "This is a starting point for a brainstorm, not a decision. Every idea below has its evidence next to it. Scores compare ideas within this run only.", "",
          "## Data used", ""]
     for k, v in counts.items():
         L.append(f"- {k}: {v if v else '[MISSING] none provided'}")
     L += ["", "## Themes ranked", "",
-          "| Theme | Score | Demand (monthly searches) | Trend | Sources | Competitors posted | You posted | Note |", "|---|---|---|---|---|---|---|---|"]
+          "| Theme | Score | Campaign | Past performance | Demand (monthly searches) | Trend | Sources | Competitors posted | You posted | Note |", "|---|---|---|---|---|---|---|---|---|---|"]
     for t in themetable:
         note = []
         if t["weak"]:
@@ -50,7 +55,8 @@ def build(brand, as_of, counts, themetable, by_stage, emerging, comp_new, comp_t
             note.append("keyword data [MISSING]")
         if t["raw"]["gap"] >= 1:
             note.append("competitors cover it, you do not")
-        L.append(f"| {t['theme']} | {t['score']} | {_num(t['raw']['demand']) if not t['missing_keywords'] else '[MISSING]'} | {t['raw']['trend']} | "
+        pf = f"{100 * t['perf']['value']:.0f} ({t['perf']['n']} pieces)" if t["perf"] else "[MISSING]"
+        L.append(f"| {t['theme']} | {t['score']} | {'on campaign' if t['on_campaign'] else 'off campaign'} | {pf} | {_num(t['raw']['demand']) if not t['missing_keywords'] else '[MISSING]'} | {t['raw']['trend']} | "
                  f"{', '.join(t['raw']['source_types']) or 'none'} | {len(t['competitor'])} | {len(t['own'])} | {'; '.join(note)} |")
     for s in STAGES:
         L += ["", f"## {STAGE_NAMES[s]} ({s})", ""]

@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import brand as brandmod, check as checkmod, collect, competitors, funnel, keywords, report, sources, topics
+from . import brand as brandmod, check as checkmod, collect, competitors, funnel, keywords, performance, report, sources, topics
 from .util import read_csv_rows
 
 
@@ -58,13 +58,17 @@ def analyze(data, as_of=None, top=8):
     counts.update(kcounts)
     inv_path = data / "content" / "content-inventory.csv"
     inventory = read_csv_rows(inv_path) if inv_path.exists() else []
+    perf = performance.load(data)
+    if not inventory and perf:
+        inventory = [dict(url=x["url"], title=x["title"], stage=x["stage"], publish_date=x["date"]) for x in perf]
     counts["Your published content (inventory)"] = len(inventory)
     dates = [i["date"] for i in items if i["date"]]
     as_of = as_of or (max(dates) if dates else "")
     rules = funnel.load_rules()
-    table = topics.theme_table(items, kws, b, as_of, inventory)
+    counts["Past performance of your published pieces (analytics export)"] = len(perf)
+    table = topics.theme_table(items, kws, b, as_of, inventory, perf)
     chosen = load_chosen(data)
-    by_stage, ideas = topics.ideas_by_stage(table, items, kws, b, rules, as_of, top, hide=chosen)
+    by_stage, ideas = topics.ideas_by_stage(table, items, kws, b, rules, as_of, top, hide=chosen, perf=perf)
     counts["Ideas hidden because you already chose them"] = sum(1 for x in ideas if x["text"].lower().strip() in chosen) or "0 (none chosen yet)"
     ebooks = []
     for t in table:
@@ -80,6 +84,8 @@ def analyze(data, as_of=None, top=8):
     thin = [t["theme"] for t in table if not t["own"] and t["raw"]["demand"] > 0]
     if thin:
         gaps.append("Themes with search demand and no page from you yet: " + ", ".join(thin))
+    if not perf:
+        gaps.append("[MISSING] no content performance export, so past performance was left out of every score and the other factors were scaled up.")
     if not any(not t["missing_keywords"] for t in table):
         gaps.append("[MISSING] no keyword exports were provided, so demand and difficulty could not be used.")
     domain = b["domain"].lower()
@@ -89,7 +95,7 @@ def analyze(data, as_of=None, top=8):
     comp_new = competitors.new_since(items, snap)
     text = report.build(b, as_of, counts, table, by_stage, topics.emerging_phrases(items, b["themes"]), comp_new,
                         competitors.theme_counts(items, b["themes"]), refresh, inv_stage, ebooks, gaps)
-    return dict(text=text, items=items, ideas=ideas, brand=b, inventory=inventory, keywords=kws, as_of=as_of, table=table, by_stage=by_stage)
+    return dict(text=text, items=items, ideas=ideas, brand=b, inventory=inventory, keywords=kws, as_of=as_of, table=table, by_stage=by_stage, performance=perf)
 
 
 def mine(data, out, as_of=None, top=8):

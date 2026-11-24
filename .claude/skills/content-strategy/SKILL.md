@@ -19,8 +19,9 @@ Step 3 of the B2B Campaign Lifecycle Toolkit. It comes after the campaign assist
    - Trade publications and competitors: feeds and sitemaps. `python3 -m contentstrategy collect <config.json>` downloads them slowly and obeys robots.txt. Ask the user first, and tell them to check each site's terms.
    - Reddit, LinkedIn, Quora, G2: the user exports or pastes posts into a CSV (source, title, text, url, date, engagement). Only titles and short excerpts are used.
    - Keywords: the user exports from Google Ads Keyword Planner, Semrush and Google Trends. Use the numbers exactly as exported.
+   - Past performance: the user exports their published pieces from their analytics tool into `content/content-performance.csv` (`url, title, stage, publish_date, visits, conversions, promotion_spend, channel`). Ask which number counts as a conversion at each stage (downloads, leads or marketing qualified leads). Without this file, past performance is left out of the scores, and you must say so.
 3. **Run it:** `python3 -m contentstrategy mine --data <folder> --out output/topic-brief.md`
-4. **Add judgment.** Read the brief. For the top themes, link them to the campaign pillars and write one angle per funnel stage in the brand's voice. Flag ideas that conflict with the brand's tone, product claims or legal rules. Say which ideas are weak signals (one source type, or no keyword data), and which sit outside the campaign theme.
+4. **Add judgment.** Read the brief. Each idea shows its score parts (campaign relevance, past performance, search demand, ranking ease, audience signal, trend and freshness, competitor gap) and what was left out. Explain a score from those parts, never from a hunch. Flag ideas whose past performance came from only a few pieces or from promoted pieces. For the top themes, link them to the campaign pillars and write one angle per funnel stage in the brand's voice. Flag ideas that conflict with the brand's tone, product claims or legal rules. Say which ideas are weak signals (one source type, or no keyword data), and which sit outside the campaign theme.
 5. **Check it:** `python3 -m contentstrategy check output/topic-brief.md --brand <brand-profile.json>`
 
 ## Part 2: Write one piece
@@ -48,7 +49,7 @@ Step 3 of the B2B Campaign Lifecycle Toolkit. It comes after the campaign assist
 - Every idea needs its evidence next to it: a link, or keyword data with its source. If something is missing, write [MISSING]. Never invent a volume, difficulty, ranking, citation or quote.
 - AEO and GEO checks are common recommendations, not published rules. Never promise a ranking or a citation.
 - Competitor activity is public information only. Do not copy their content. Use it to find gaps and angles.
-- Scores compare ideas within one run. Do not present them as forecasts.
+- Scores compare ideas within one run. Do not present them as forecasts. Bottom-of-funnel searches are small by nature, so compare ideas within a funnel stage, not across stages.
 - Keep the user's own tone rules (words to avoid, plain language). Sound human, not polished.
 
 ## Weekly agent

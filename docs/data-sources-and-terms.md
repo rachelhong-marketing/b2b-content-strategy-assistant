@@ -10,6 +10,7 @@ Check each site's terms yourself before you collect anything. The notes below sa
 | LinkedIn, Quora, G2 | You export or paste into a CSV | Same columns | These sites generally restrict automated collection, so the tool never reaches them. |
 | Google Ads Keyword Planner | Export the keyword ideas as CSV | Monthly searches, competition, top-of-page bid | Volumes can be ranges such as "1K - 10K". The lower end is used. |
 | Semrush | Export keywords as CSV | Volume, keyword difficulty, cost per click, your position and page | When two exports give a volume, the larger is used and both sources are named. |
+| Your own analytics | Export your published pieces as CSV: `url, title, stage, publish_date, visits, conversions, promotion_spend, channel` | Visits, conversions, paid promotion | Your own data. Remove anything personal. Judged against your other pieces at the same funnel stage. |
 | Google Trends | Export a term over time as CSV | Direction: up, flat or down (last third compared with first third) | Needs at least six data points per term. |
 
 ## Community CSV columns

@@ -59,6 +59,9 @@ Prepared as of 2026-10-23. Format suggested: Blog post or explainer.
 **Link to your own pages (internal links)**
 - Duplicate records in your CRM: how to spot them (TOFU) https://fernhill.example/blog/duplicate-records
 - How to remove duplicate contacts (TOFU) https://fernhill.example/blog/remove-duplicate-contacts
+- Duplicate records checklist for RevOps and data teams (MOFU) https://fernhill.example/guides/duplicate-checklist
+- Customer story: a regional bank merges duplicate records (BOFU) https://fernhill.example/stories/regional-bank
+- Duplicate records ROI calculator (BOFU) https://fernhill.example/roi/duplicate-records-roi
 
 **Answer-engine checklist** (run `aeo-check` when the draft is done)
 - Direct answer in the first paragraph, 40 to 60 words.

@@ -2,20 +2,37 @@
 import re
 from collections import Counter
 
+from . import performance as perfmod, scoring
 from .funnel import STAGES, FORMATS, classify
 from .util import STOP, days_between, has_phrase, minmax, words
 
 QUESTION_RX = re.compile(r"^(how|why|what|when|should|can|is|are|do|does|which|where)\b", re.I)
-WEIGHTS = dict(mentions=0.20, engagement=0.10, demand=0.20, ease=0.10, trend=0.10, questions=0.10, fit=0.10, gap=0.10)
+GENERIC = {"data", "customer", "customers", "one", "see", "many", "how", "new"}
 RECENT_DAYS = 90
 
-
-OFF_CAMPAIGN = 0.6  # ideas outside the campaign themes count for 60 percent when a campaign is set
 
 
 def is_question(title):
     t = (title or "").strip()
     return t.endswith("?") or bool(QUESTION_RX.match(t))
+
+
+def _stems(text):
+    return {w[:-1] if w.endswith("s") and len(w) > 3 else w for w in words(text) if w not in STOP and w not in GENERIC and len(w) > 2}
+
+
+def campaign_relevance(theme, text, brand):
+    """0..1. Without a campaign: the theme's brand fit. With one: 0.6 for an on-campaign theme, plus up to 0.4 for words in common
+    with the campaign theme or a pillar. An idea outside the campaign themes keeps at most 15 percent of its brand fit."""
+    fit = brand["themes"].get(theme, {}).get("fit", 0.0) if theme else 0.0
+    c = brand.get("campaign")
+    if not c:
+        return fit
+    if theme not in c.get("themes", []):
+        return round(scoring.OFF_CAMPAIGN_FIT * fit, 2)
+    mine = _stems(text)
+    best = max((len(mine & _stems(t)) for t in [c.get("theme", "")] + list(c.get("pillars", []))), default=0)
+    return round(0.6 + 0.4 * (1.0 if best >= 2 else 0.5 if best == 1 else 0.0), 2)
 
 
 def themes_for(text, themes):
@@ -32,8 +49,9 @@ def recent(items, as_of):
     return out
 
 
-def theme_table(items, keywords, brand, as_of, inventory):
+def theme_table(items, keywords, brand, as_of, inventory, perf=None):
     themes = brand["themes"]
+    campaign_themes = (brand.get("campaign") or {}).get("themes")
     items = recent(items, as_of)
     rows = {n: dict(theme=n, trade=[], community=[], competitor=[], own=[], keywords=[], fit=t["fit"]) for n, t in themes.items()}
     for it in items:
@@ -66,12 +84,17 @@ def theme_table(items, keywords, brand, as_of, inventory):
     for n, r in rows.items():
         x = raw[n]
         trend_pts = {"up": 1.0, "flat": 0.5, "unknown": 0.3, "down": 0.0}[x["trend"]]
-        ease = 0.5 if x["kd"] is None else 1 - kds[n]
-        comp = dict(mentions=nm[n], engagement=ne[n], demand=nd[n], ease=ease, trend=trend_pts, questions=x["qshare"], fit=r["fit"], gap=x["gap"])
-        score = round(100 * sum(WEIGHTS[k] * comp[k] for k in WEIGHTS), 1)
+        has_kw = bool(r["keywords"])
+        camp = r["fit"] if campaign_themes is None else (1.0 if n in campaign_themes else round(scoring.OFF_CAMPAIGN_FIT * r["fit"], 2))
+        pinfo = perfmod.for_idea(perf, n, None, themes_for, themes)
+        parts = dict(campaign=camp, performance=pinfo["value"] if pinfo else None, demand=nd[n] if has_kw else None,
+                     ease=(0.5 if x["kd"] is None else 1 - kds[n]) if has_kw else None,
+                     audience=0.4 * nm[n] + 0.3 * ne[n] + 0.3 * x["qshare"], trend=trend_pts, gap=x["gap"])
+        score, left_out = scoring.combine(parts)
         evidence = sorted(r["community"] + r["trade"], key=lambda it: (-it["engagement"], it["date"] or ""), reverse=False)[:3]
         weak = len(x["source_types"]) < 2 and not r["keywords"]
-        out.append(dict(theme=n, score=score, components={k: round(v, 2) for k, v in comp.items()}, raw=x, trade=r["trade"], community=r["community"],
+        out.append(dict(theme=n, score=score, components={k: (round(v, 2) if v is not None else None) for k, v in parts.items()}, left_out=left_out,
+                        perf=pinfo, on_campaign=campaign_themes is None or n in campaign_themes, raw=x, trade=r["trade"], community=r["community"],
                         competitor=r["competitor"], own=r["own"], keywords=r["keywords"], evidence=evidence, weak=weak,
                         missing_keywords=not r["keywords"]))
     out.sort(key=lambda t: -t["score"])
@@ -90,12 +113,15 @@ def emerging_phrases(items, themes, min_items=3, top=6):
     return [(p, c) for p, c in df.most_common(top * 3) if c >= min_items][:top]
 
 
-def ideas_by_stage(themetable, items, keywords, brand, rules, as_of, top=8, hide=()):
+def ideas_by_stage(themetable, items, keywords, brand, rules, as_of, top=8, hide=(), perf=None):
     """Topic ideas from three kinds of evidence: keywords people search, questions people ask, headlines in the news.
-    Each idea is placed in a funnel stage and scored: half from its theme's score, half from its own signal."""
+    Each idea is placed in a funnel stage and scored with the same seven factors as the themes (see scoring.py).
+    Factors that belong to the idea itself (its own search volume, its own engagement) are used where they exist;
+    otherwise the factor comes from the idea's theme."""
     themes = brand["themes"]
     campaign_themes = set((brand.get("campaign") or {}).get("themes", []))
-    score_of = {t["theme"]: t["score"] for t in themetable}
+    tt = {t["theme"]: t for t in themetable}
+    score_of = {n: t["score"] for n, t in tt.items()}
     vols = minmax({k: v["volume"] for k, v in keywords.items()})
     kds = minmax({k: v["difficulty"] for k, v in keywords.items()})
     recent_items = recent(items, as_of)
@@ -103,7 +129,11 @@ def ideas_by_stage(themetable, items, keywords, brand, rules, as_of, top=8, hide
     engs = minmax({i: it["engagement"] for i, it in enumerate(comm)})
     ideas, seen = [], set()
 
-    def add(kind, text, signal, **extra):
+    def fresh_of(it):
+        age = days_between(as_of, it["date"]) if it.get("date") else None
+        return 0.3 if age is None else max(0.0, 1 - age / RECENT_DAYS)
+
+    def add(kind, text, own, **extra):
         key = text.lower().strip()
         if key in seen:
             return
@@ -112,24 +142,30 @@ def ideas_by_stage(themetable, items, keywords, brand, rules, as_of, top=8, hide
         found = themes_for(text, themes)
         theme = max(found, key=lambda n: score_of.get(n, 0)) if found else ""
         stage, why = classify(text, rules)
-        score = 0.5 * score_of.get(theme, 0.0) + 0.5 * 100 * signal
+        tc = tt.get(theme, {}).get("components", {})
+        theme_trend = tc.get("trend")
+        parts = dict(campaign=campaign_relevance(theme, text, brand), performance=None,
+                     demand=own.get("demand", tc.get("demand")), ease=own.get("ease", tc.get("ease")),
+                     audience=own.get("audience", tc.get("audience")),
+                     trend=own["trend"](theme_trend) if "trend" in own else theme_trend, gap=tc.get("gap", 0.0) if theme else 0.0)
+        info = perfmod.for_idea(perf, theme, stage, themes_for, themes)
+        parts["performance"] = info["value"] if info else None
+        score, left_out = scoring.combine(parts)
         on_campaign = not campaign_themes or theme in campaign_themes
-        if not on_campaign:
-            score *= OFF_CAMPAIGN
         ideas.append(dict(kind=kind, text=text, stage=stage, matched=why, theme=theme, hidden=hidden, on_campaign=on_campaign,
-                          score=round(score, 1), format=FORMATS[stage], **extra))
+                          score=score, parts=parts, left_out=left_out, perf=info, format=FORMATS[stage], **extra))
 
     for k, v in keywords.items():
         if v["volume"] is None:
             continue
-        ease = 0.5 if v["difficulty"] is None else 1 - kds[k]
-        add("keyword", k, 0.6 * vols[k] + 0.4 * ease, data=v)
+        add("keyword", k, dict(demand=vols[k], ease=0.5 if v["difficulty"] is None else 1 - kds[k]), data=v)
     for i, it in enumerate(comm):
-        add("question", it["title"], 0.7 * engs[i] + 0.3 * (1.0 if is_question(it["title"]) else 0.0), item=it)
+        fr = fresh_of(it)
+        add("question", it["title"], dict(audience=0.7 * engs[i] + 0.3 * (1.0 if is_question(it["title"]) else 0.0),
+                                          trend=lambda tt_, fr=fr: 0.5 * fr + 0.5 * (tt_ if tt_ is not None else 0.3)), item=it)
     for it in recent_items:
         if it["source_type"] == "trade":
-            age = days_between(as_of, it["date"]) if it.get("date") else None
-            fresh = 0.3 if age is None else max(0.0, 1 - age / RECENT_DAYS)
-            add("headline", it["title"], 0.5 * fresh, item=it)
+            fr = fresh_of(it)
+            add("headline", it["title"], dict(trend=lambda tt_, fr=fr: 0.5 * fr + 0.5 * (tt_ if tt_ is not None else 0.3)), item=it)
     by_stage = {s: sorted([x for x in ideas if x["stage"] == s and x["score"] >= 5 and not x["hidden"]], key=lambda x: -x["score"])[:top] for s in STAGES}
     return by_stage, ideas

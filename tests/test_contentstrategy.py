@@ -122,7 +122,7 @@ class Mining(unittest.TestCase):
         self.assertIn("[MISSING]", self.text)   # e.g. difficulty for keywords only in Google Ads
 
     def test_gaps_and_refresh(self):
-        self.assertIn("no published BOFU content", self.text)
+        self.assertIn("Themes with search demand and no page from you yet", self.text)
         self.assertIn("position 18", self.text)
 
     def test_competitor_diff_against_snapshot(self):
@@ -337,6 +337,89 @@ class Citations(unittest.TestCase):
         self.assertIn("16 tests logged", lines)
         self.assertIn("too few tests to compare", lines)
         self.assertIn("clearline", lines)
+
+
+class Scoring(unittest.TestCase):
+    BRAND = brand.load(DATA / "brand" / "brand-profile.json")
+
+    def test_weights_sum_to_one_and_demand_equals_performance(self):
+        from contentstrategy import scoring
+        self.assertAlmostEqual(sum(scoring.WEIGHTS.values()), 1.0)
+        self.assertEqual(scoring.WEIGHTS["demand"], scoring.WEIGHTS["performance"])
+        self.assertEqual(scoring.WEIGHTS["demand"], 0.25)
+
+    def test_missing_factor_is_left_out_and_rest_scale_up(self):
+        from contentstrategy import scoring
+        full = dict(campaign=1.0, performance=1.0, demand=1.0, ease=1.0, audience=1.0, trend=1.0, gap=1.0)
+        self.assertEqual(scoring.combine(full), (100.0, []))
+        s, left = scoring.combine(dict(full, performance=None))
+        self.assertEqual((s, left), (100.0, ["performance"]))
+        s, left = scoring.combine(dict(full, performance=0.0))
+        self.assertEqual(s, 75.0)
+        self.assertEqual(scoring.combine({k: None for k in full})[0], 0.0)
+
+    def test_campaign_relevance_is_graded(self):
+        from contentstrategy import topics
+        on_pillar = topics.campaign_relevance("duplicate records", "how to find duplicate records across systems", self.BRAND)
+        on_theme_only = topics.campaign_relevance("duplicate records", "dedupe contacts quickly", self.BRAND)
+        off = topics.campaign_relevance("lead routing", "lead routing rules", self.BRAND)
+        self.assertGreater(on_pillar, on_theme_only)
+        self.assertGreater(on_theme_only, off)
+        self.assertEqual(on_theme_only, 0.6)
+        self.assertLessEqual(off, 0.15)
+
+    def test_no_campaign_falls_back_to_brand_fit(self):
+        from contentstrategy import topics
+        b = dict(self.BRAND)
+        b.pop("campaign")
+        self.assertEqual(topics.campaign_relevance("duplicate records", "anything", b), b["themes"]["duplicate records"]["fit"])
+
+
+class Performance(unittest.TestCase):
+    def test_pieces_are_scored_within_their_own_stage(self):
+        from contentstrategy import performance
+        perf = performance.load(DATA)
+        by = {x["title"]: x for x in perf}
+        # a middle-of-funnel page with few visits but the most conversions still tops its stage
+        self.assertEqual(by["CRM data cleanup: where to start"]["score"], 1.0)
+        self.assertEqual(by["Duplicate records in your CRM: how to spot them"]["score"], 1.0)
+        # top of funnel is judged on visits, so a bottom-of-funnel page's low visits do not hurt it
+        self.assertGreater(by["Customer story: a regional bank merges duplicate records"]["score"], 0.9)
+
+    def test_promoted_pieces_are_counted(self):
+        from contentstrategy import performance, topics
+        perf = performance.load(DATA)
+        b = brand.load(DATA / "brand" / "brand-profile.json")
+        info = performance.for_idea(perf, "duplicate records", "TOFU", topics.themes_for, b["themes"])
+        self.assertEqual(info["basis"], "same theme and stage")
+        self.assertEqual(info["promoted"], 1)
+        self.assertIn("paid promotion", performance.note(info))
+
+    def test_too_few_pieces_means_missing_not_a_guess(self):
+        from contentstrategy import performance, topics
+        perf = performance.load(DATA)
+        b = brand.load(DATA / "brand" / "brand-profile.json")
+        self.assertIsNone(performance.for_idea(perf, "lead routing", "TOFU", topics.themes_for, b["themes"]))
+        self.assertIsNone(performance.for_idea([], "duplicate records", "TOFU", topics.themes_for, b["themes"]))
+        self.assertIn("[MISSING]", performance.note(None))
+
+    def test_brief_without_performance_file_says_so_and_still_works(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as d:
+            data = Path(d) / "data"
+            shutil.copytree(DATA, data)
+            (data / "content" / "content-performance.csv").unlink()
+            ctx = cli.analyze(data)
+            self.assertIn("no content performance export", ctx["text"])
+            self.assertTrue(all("performance" in x["left_out"] for x in ctx["ideas"]))
+            self.assertEqual(check.check_brief(ctx["text"], ctx["brand"]), [])
+
+    def test_brief_shows_score_parts_for_every_idea(self):
+        ctx = cli.analyze(DATA)
+        n_ideas = sum(len(v) for v in ctx["by_stage"].values())
+        self.assertEqual(ctx["text"].count("  - Score parts:"), n_ideas)
+        self.assertEqual(ctx["text"].count("  - Past performance:"), n_ideas)
+        self.assertIn("campaign relevance 25%", ctx["text"])
 
 
 class Hygiene(unittest.TestCase):

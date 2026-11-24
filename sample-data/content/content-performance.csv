@@ -1,0 +1,14 @@
+url,title,stage,publish_date,visits,conversions,promotion_spend,channel,notes
+https://fernhill.example/blog/what-is-data-hygiene,What is data hygiene?,TOFU,2025-11-10,5200,,0,organic,made-up
+https://fernhill.example/blog/duplicate-records,Duplicate records in your CRM: how to spot them,TOFU,2025-12-02,7400,,0,organic,made-up
+https://fernhill.example/blog/remove-duplicate-contacts,How to remove duplicate contacts,TOFU,2026-01-20,6100,,800,paid social,made-up
+https://fernhill.example/blog/data-quality-basics,Data quality basics for analytics teams,TOFU,2026-03-04,1900,,0,organic,made-up
+https://fernhill.example/blog/bad-data-reports,Why bad data breaks your reports,TOFU,2026-04-14,1500,,0,organic,made-up
+https://fernhill.example/blog/crm-cleanup,CRM data cleanup: where to start,MOFU,2026-02-18,3300,140,0,organic,made-up
+https://fernhill.example/guides/duplicate-checklist,Duplicate records checklist for RevOps and data teams,MOFU,2026-03-22,2100,96,1500,paid search,made-up
+https://fernhill.example/guides/data-quality-framework,Data quality framework: a template,MOFU,2026-05-06,1200,22,0,organic,made-up
+https://fernhill.example/stories/regional-bank,Customer story: a regional bank merges duplicate records,BOFU,2026-06-10,900,31,0,organic,made-up
+https://fernhill.example/roi/duplicate-records-roi,Duplicate records ROI calculator,BOFU,2026-07-15,700,18,0,organic,made-up
+https://fernhill.example/blog/migration-plan,CRM migration plan: what to clean first,MOFU,2026-04-28,800,9,0,organic,made-up
+https://fernhill.example/blog/messy-data-signs,Messy data in your CRM: 5 signs,TOFU,2026-02-05,3600,,0,organic,made-up
+https://fernhill.example/guides/data-hygiene-template,Data hygiene template for revenue teams,MOFU,2026-05-20,1700,58,0,organic,made-up
