@@ -39,6 +39,16 @@ Step 3 of the B2B Campaign Lifecycle Toolkit. It comes after the campaign assist
 4. **Structured data:** `python3 -m contentstrategy schema <draft> --brand <brand-profile.json> --out <draft>.schema.json`. Tell the user to paste it into the page inside a script tag of type application/ld+json, and to correct the page address if the guessed one is wrong.
 5. Show the whole updated draft after any change, not only the changed part.
 
+## Part 2b: Other formats (case study, long-form guide, short social post)
+
+`python3 -m contentstrategy format <kind> --data <folder> ...` writes a brief, and `format-check <kind> <draft> --brand <brand-profile.json>` checks the finished draft. Fix every FAIL. Show the whole updated draft after any change.
+
+- **case-study** `--source <customer-source.json>`: needs a real customer source file with the customer's permission, an approver and approval date, and every result with its source. If the user has none, say a case study cannot be drafted yet and ask for it. Never invent a customer, a quote or a number. Run `format-check case-study <draft> --brand <profile> --source <customer-source.json>` so every figure in Results is checked against the source.
+- **guide** `--theme "<theme>"`: a chapter outline from the best-scoring ideas on that theme, in funnel order. Fill each chapter with a short answer first. Ask the user for one original element.
+- **social** `--idea "<text>" --platform linkedin`: a brief with the platform's character limit. Write in a real person's voice; do not invent a source.
+
+For ad and email copy, send the user to the Campaign Assistant (step 2).
+
 ## Part 3: Measure AI citations (monthly, manual)
 
 - `python3 -m contentstrategy citation-sheet --data <folder>` adds the top buyer questions to `state/ai-citation-log.csv`, one row per AI tool.

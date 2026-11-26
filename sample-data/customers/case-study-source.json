@@ -1,0 +1,20 @@
+{
+  "customer": "Made-up: a regional bank (name withheld)",
+  "industry": "Financial services",
+  "size": "1,000 to 10,000 employees",
+  "contact_title": "Director of Analytics",
+  "challenge": "Made-up: the same customer appeared in four systems, and month-end reports did not match between teams.",
+  "what_they_did": [
+    "Made-up: connected the customer database, the CRM and the billing system",
+    "Made-up: reviewed the matches the platform suggested, then merged them in batches",
+    "Made-up: turned on monitoring so new duplicates are flagged within a day"
+  ],
+  "results": [
+    {"claim": "Made-up: duplicate customer records fell by 52%", "source": "made-up customer webinar", "period": "one quarter"},
+    {"claim": "Made-up: month-end reporting took 3 days instead of 5", "source": "made-up customer webinar", "period": "after the merge"}
+  ],
+  "quote": {"text": "Made-up: we finally agree on how many customers we have.", "speaker": "Made-up name", "title": "Director of Analytics"},
+  "approved_by": "Sample Customer Marketing",
+  "approval_date": "2026-11-10",
+  "customer_permission": "yes"
+}

@@ -436,3 +436,80 @@ class Hygiene(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Formats(unittest.TestCase):
+    def setUp(self):
+        from contentstrategy import formats
+        self.f = formats
+        self.brand = brand.load(DATA / "brand" / "brand-profile.json")
+        self.src = formats.load_case_source(DATA / "customers" / "case-study-source.json")
+
+    def test_case_study_brief_uses_only_the_source(self):
+        t = self.f.build_case_study(self.src, self.brand, "2026-11-24")
+        self.assertIn("duplicate customer records fell by 52%", t)
+        self.assertIn("approved_by: Sample Customer Marketing", t)
+        self.assertIn("[MISSING", t)
+        self.assertTrue(any(l == "FAIL" for l, _ in self.f.check_case_study(t, self.brand)))
+
+    def test_case_study_needs_permission_and_approval(self):
+        import json as j
+        bad = dict(self.src, customer_permission="no")
+        p = Path(tempfile.mkdtemp()) / "s.json"
+        p.write_text(j.dumps(bad))
+        with self.assertRaises(ValueError):
+            self.f.load_case_source(p)
+        p.write_text(j.dumps({k: v for k, v in self.src.items() if k != "approved_by"}))
+        with self.assertRaises(ValueError):
+            self.f.load_case_source(p)
+
+    def test_case_study_figures_must_be_in_source(self):
+        src_text = (DATA / "customers" / "case-study-source.json").read_text()
+        good = """---
+title: A bank cut duplicates by half
+customer: Made-up bank
+author: Sample Author, Content Lead
+date: 2026-11-24
+approved_by: Sample Customer Marketing
+approval_date: 2026-11-10
+---
+# A bank cut duplicates by half
+
+A made-up bank cut duplicate customer records by 52% in one quarter and closed its books in 3 days.
+
+## The challenge
+
+The same customer sat in four systems.
+
+## What they did
+
+They connected three systems and merged in batches.
+
+## The results
+
+Duplicate customer records fell by 52% in one quarter. Month-end reporting took 3 days instead of 5.
+
+> We finally agree on how many customers we have.
+> Made-up name, Director of Analytics
+"""
+        self.assertEqual([x for x in self.f.check_case_study(good, self.brand, src_text) if x[0] == "FAIL"], [])
+        bad = good.replace("52%", "80%")
+        msgs = [m for l, m in self.f.check_case_study(bad, self.brand, src_text) if l == "FAIL"]
+        self.assertTrue(any("80%" in m and "not in your source" in m for m in msgs))
+
+    def test_guide_and_social_briefs(self):
+        ctx = cli.analyze(DATA, "2026-11-24", top=50)
+        g = self.f.build_guide("duplicate records", ctx["ideas"], self.brand, "2026-11-24")
+        self.assertGreaterEqual(g.count("## Chapter "), 5)
+        self.assertTrue(any("[MISSING" in m for _, m in self.f.check_guide(g, self.brand)))
+        idea = ctx["ideas"][0]
+        s = self.f.build_social(idea, self.brand, "2026-11-24")
+        self.assertIn("character_limit: 3000", s)
+        with self.assertRaises(ValueError):
+            self.f.build_guide("not a theme", ctx["ideas"], self.brand, "2026-11-24")
+
+    def test_social_check_limits(self):
+        long = "---\nplatform: linkedin\nauthor: A B, Role\n---\n" + "x" * 3100
+        self.assertTrue(any("3000" in m for _, m in self.f.check_social(long, self.brand)))
+        avoid = "---\nplatform: linkedin\nauthor: A B, Role\n---\nIs this seamless?\n\nSee https://example.com"
+        self.assertTrue(any("seamless" in m for _, m in self.f.check_social(avoid, self.brand)))

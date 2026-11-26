@@ -126,6 +126,20 @@ def main(argv=None):
     o.add_argument("--idea", required=True, help="the idea's text, or part of it")
     o.add_argument("--out-dir", default="output/drafts")
     o.add_argument("--as-of")
+    fo = sub.add_parser("format", help="write a brief for a case study, a long-form guide or a short social post")
+    fo.add_argument("kind", choices=["case-study", "guide", "social"])
+    fo.add_argument("--data", required=True)
+    fo.add_argument("--source", help="case-study: the customer source file (JSON)")
+    fo.add_argument("--theme", help="guide: the theme to build the guide on")
+    fo.add_argument("--idea", help="social: the idea's text, or part of it")
+    fo.add_argument("--platform", default="linkedin", choices=["linkedin", "x", "facebook"])
+    fo.add_argument("--out-dir", default="output/drafts")
+    fo.add_argument("--as-of")
+    fc = sub.add_parser("format-check", help="check a finished case study, guide or social post")
+    fc.add_argument("kind", choices=["case-study", "guide", "social"])
+    fc.add_argument("draft")
+    fc.add_argument("--brand", required=True)
+    fc.add_argument("--source", help="case-study: the customer source file, to check every figure against")
     k = sub.add_parser("aeo-check", help="check a draft for answer engine and AI search readiness")
     k.add_argument("draft")
     k.add_argument("--brand", required=True)
@@ -165,6 +179,41 @@ def main(argv=None):
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(text, encoding="utf-8")
         print(f"Wrote {dest}")
+    elif a.cmd == "format":
+        from . import formats, outline as outlinemod
+        ctx = analyze(a.data, a.as_of, top=50)
+        if a.kind == "case-study":
+            if not a.source:
+                ap.error("case-study needs --source, a customer source file")
+            text = formats.build_case_study(formats.load_case_source(a.source), ctx["brand"], ctx["as_of"])
+            name = "case-study"
+        elif a.kind == "guide":
+            if not a.theme:
+                ap.error("guide needs --theme")
+            text = formats.build_guide(a.theme, ctx["ideas"], ctx["brand"], ctx["as_of"])
+            name = f"{outlinemod.slug(a.theme)}-guide"
+        else:
+            if not a.idea:
+                ap.error("social needs --idea")
+            idea = outlinemod.find_idea(ctx["ideas"], a.idea)
+            text = formats.build_social(idea, ctx["brand"], ctx["as_of"], a.platform)
+            name = f"{outlinemod.slug(idea['text'])}-{a.platform}"
+        dest = Path(a.out_dir) / f"{name}-draft.md"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(text, encoding="utf-8")
+        print(f"Wrote {dest}")
+    elif a.cmd == "format-check":
+        from . import formats
+        b = brandmod.load(a.brand)
+        txt = Path(a.draft).read_text(encoding="utf-8")
+        if a.kind == "case-study":
+            res = formats.check_case_study(txt, b, Path(a.source).read_text(encoding="utf-8") if a.source else None)
+        elif a.kind == "guide":
+            res = formats.check_guide(txt, b)
+        else:
+            res = formats.check_social(txt, b)
+        print(formats.format_results(res))
+        return 1 if any(l == "FAIL" for l, _ in res) else 0
     elif a.cmd == "aeo-check":
         from . import aeo
         res = aeo.check_draft(Path(a.draft).read_text(encoding="utf-8"), brandmod.load(a.brand), a.as_of)

@@ -32,11 +32,24 @@ All data here is made up. Fernhill Software is a fictional company. It sells the
 | Competitor activity | New pages each competitor published and what they push | [Topic brief](docs/example-topic-brief.md) |
 | Search fixes | Pages worth refreshing, and themes with demand and no page from you | [Topic brief](docs/example-topic-brief.md) |
 | Writing brief | For one idea: question headline, direct-answer slot, question headings, FAQ, evidence, internal links | [Writing brief](docs/example-draft-brief.md) |
-| AI search check | A pass or fail list for a finished draft | `aeo-check` |
+| Case study brief | Outline built from a real customer source file (approved, with permission), with every fact listed and every sentence left for you. The check fails any number not in the source | [Brief](docs/example-case-study-brief.md), [finished example](docs/example-case-study-finished.md) |
+| Long-form guide outline | Chapters taken from your best-scoring ideas on one theme, in funnel order, with evidence for each | [Outline](docs/example-guide-outline.md) |
+| Short social post brief | Opening line, three points, source and call to action, with the platform's character limit | [Brief](docs/example-social-post-brief.md) |
+| AI search check | A pass or fail list for a finished blog draft | `aeo-check` |
+| Format check | The same kind of pass or fail list for a case study, guide or social post | `format-check` |
 | Structured data | Ready-to-paste article and FAQ markup | [Schema](docs/example-schema.json) |
 | Citation report | A monthly count of whether AI tools quote you, from your manual test log | `citation-report` |
 
-The tool writes no articles. You or your writing assistant fill each `[MISSING]` slot.
+### What it writes, and what it doesn't
+
+| Format | What the tool gives you | Who writes the words |
+|---|---|---|
+| Blog post or explainer | Writing brief, AEO and GEO check, structured data | You, or Claude working in your voice |
+| Case study | Outline and a strict check. Needs a customer source file with the customer's permission and an approver. It never invents a customer, quote or number | You or Claude, from the facts in the source file |
+| Long-form guide or ebook | Chapter outline and a check | You or Claude |
+| Short social post | Brief with the character limit, and a check | You or Claude |
+
+The Python tool writes no prose in any format. In Claude Code the skill has Claude fill each `[MISSING]` slot, then run the check. Each draft still needs a person's review. For ad and email copy, use the [Campaign Assistant](https://github.com/rachelhong-marketing/b2b-campaign-assistant).
 
 ## Why this exists
 
