@@ -8,6 +8,36 @@ An AI assistant for B2B content strategy, in four jobs. It finds topics inside y
 
 All data here is made up. Fernhill Software is a fictional company. It sells the Fernhill Data Quality Platform, which finds and merges duplicate customer records across systems. The same company, product, buyers and competitors appear in the Campaign Assistant and the Product Marketing Agent.
 
+## What you give it, and what you get back
+
+### What you give it
+
+| You provide | What it is | Where it usually comes from |
+|---|---|---|
+| Brand profile | Your audiences, content themes, words to avoid, competitors and website | You write it once. Step 1 and step 2 can supply much of it |
+| Audience questions | What your buyers ask online | Reddit, LinkedIn, Quora, G2, exported or pasted as CSV |
+| Industry news | Stories your buyers read | News feeds you list |
+| Competitor pages | What competitors publish | Their feeds or sitemaps |
+| Keywords | What people search for and how often | Google Keyword Planner, Semrush, Google Trends |
+| Content inventory and performance (optional) | What you have published and how each page did | Your website and analytics |
+| Campaign (optional) | The campaign theme and messages | The [Campaign Assistant](https://github.com/rachelhong-marketing/b2b-campaign-assistant) master brief |
+| A finished draft (optional) | A piece you wrote, to check it | You |
+
+### What you get back
+
+| Output | What it looks like | Example |
+|---|---|---|
+| Topic brief | Ranked themes and content ideas for each funnel stage, each with its evidence and a suggested format | [Topic brief](docs/example-topic-brief.md) |
+| Stage gaps | Where you are thin on top, middle or bottom of funnel content | [Topic brief](docs/example-topic-brief.md) |
+| Competitor activity | New pages each competitor published and what they push | [Topic brief](docs/example-topic-brief.md) |
+| Search fixes | Pages worth refreshing, and themes with demand and no page from you | [Topic brief](docs/example-topic-brief.md) |
+| Writing brief | For one idea: question headline, direct-answer slot, question headings, FAQ, evidence, internal links | [Writing brief](docs/example-draft-brief.md) |
+| AI search check | A pass or fail list for a finished draft | `aeo-check` |
+| Structured data | Ready-to-paste article and FAQ markup | [Schema](docs/example-schema.json) |
+| Citation report | A monthly count of whether AI tools quote you, from your manual test log | `citation-report` |
+
+The tool writes no articles. You or your writing assistant fill each `[MISSING]` slot.
+
 ## Why this exists
 
 Content brainstorms usually start from opinions: what the team feels like writing, or what a competitor just posted. The evidence is scattered across Reddit threads, news feeds, keyword tools and competitor sites, and nobody has time to read all of it. This tool reads it for you, keeps the source next to every idea, and leaves the judgment and the writing to you.
@@ -55,7 +85,7 @@ What `aeo-check` looks at: an opening answer of 20 to 70 words, question heading
 
 The three funnel stages: **top of funnel (TOFU)** is learning about a problem, **middle of funnel (MOFU)** is comparing options, and **bottom of funnel (BOFU)** is close to choosing. Rules for sorting are in `rules/funnel-patterns.csv` and are easy to edit.
 
-## Inputs
+## Input details
 
 | Input | Where it comes from |
 |---|---|
