@@ -200,12 +200,12 @@ Weekly command: `python3 -m contentstrategy weekly --data <folder> --out-dir out
 prompts/weekly-run.md                 schedule prompt
 copilot/                              Copilot instructions and setup
 contentstrategy/                           sources, keywords, funnel, topics, competitors, report, check, collect, weekly,
-                                      outline, aeo, schema, citations
+                                      outline, aeo, schema, citations, formats
 rules/funnel-patterns.csv             funnel stage rules
 sample-data/                          made-up brand and campaign, feeds, posts, keyword exports, competitor files,
                                       a finished draft, an AI citation log
 docs/                                 data guide, example brief, example writing brief, example structured data, agent spec
-tests/                                50 tests
+tests/                                55 tests
 ```
 
 ## The B2B Campaign Lifecycle Toolkit
